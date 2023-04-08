@@ -1,0 +1,44 @@
+{
+  "songs": [
+    {
+      "id": "-TGPRg89eCw",
+      "file": "ATC - Around The World.mp3",
+      "title": "Around The World",
+      "artist": "ATC",
+      "duration": 217,
+      "timestamp": "3:37",
+      "image": "https://i.ytimg.com/vi/-TGPRg89eCw/hq720.jpg",
+      "createdAt": "2023-04-07T16:47:47.406Z"
+    },
+    {
+      "id": "6THINTPNiP8",
+      "file": "Shawn Mendes - When You’re Gone.mp3",
+      "title": "When You’re Gone",
+      "artist": "Shawn Mendes",
+      "duration": 174,
+      "timestamp": "2:54",
+      "image": "https://i.ytimg.com/vi/6THINTPNiP8/hq720.jpg",
+      "createdAt": "2023-04-07T16:57:06.232Z"
+    },
+    {
+      "id": "gXXySBAyZVo",
+      "file": "The Weeknd & Ariana Grande - Save Your Tears.mp3",
+      "title": "Save Your Tears",
+      "artist": "The Weeknd & Ariana Grande",
+      "duration": 192,
+      "timestamp": "3:12",
+      "image": "https://i.ytimg.com/vi/gXXySBAyZVo/hq720.jpg",
+      "createdAt": "2023-04-07T17:01:21.841Z"
+    },
+    {
+      "id": "WcIcVapfqXw",
+      "file": "Rema, Selena Gomez - Calm Down.mp3",
+      "title": "Calm Down",
+      "artist": "Rema, Selena Gomez",
+      "duration": 240,
+      "timestamp": "4:00",
+      "image": "https://i.ytimg.com/vi/WcIcVapfqXw/hq720.jpg",
+      "createdAt": "2023-04-07T17:07:56.536Z"
+    }
+  ]
+}
