@@ -851,7 +851,8 @@
       "releaseYear": "2023",
       "createdAt": "2023-04-11T14:31:21.641Z",
       "users": [
-        "matija"
+        "matija",
+        "mojca"
       ]
     },
     {
@@ -881,6 +882,175 @@
       "users": [
         "matija"
       ]
+    },
+    {
+      "id": "NN1f066QTMU",
+      "file": "David Guetta & Bebe Rexha - I'm Good.mp3",
+      "title": "I'm Good",
+      "artist": "David Guetta & Bebe Rexha",
+      "duration": 177,
+      "timestamp": "2:57",
+      "image": "https://i.ytimg.com/vi/NN1f066QTMU/hq720.jpg",
+      "releaseYear": "2023",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-15T01:30:13.394Z"
+    },
+    {
+      "id": "g_osW9OINIA",
+      "file": "Cascada - Everytime We Touch.mp3",
+      "title": "Everytime We Touch",
+      "artist": "Cascada",
+      "duration": 204,
+      "timestamp": "3:24",
+      "image": "https://i.ytimg.com/vi/4G6QDNC4jPs/hq720.jpg",
+      "releaseYear": "2007",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-15T01:30:13.398Z"
+    },
+    {
+      "id": "oaP1afVVVdk",
+      "file": "Cascada - Miracle.mp3",
+      "title": "Miracle",
+      "artist": "Cascada",
+      "duration": 219,
+      "timestamp": "3:39",
+      "image": "https://i.ytimg.com/vi/UCzz4_FPbug/hqdefault.jpg",
+      "releaseYear": "2007",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-15T01:34:56.454Z"
+    },
+    {
+      "id": "8jp6kxPtdFs",
+      "file": "Cascada - Evacuate The Dancefloor.mp3",
+      "title": "Evacuate The Dancefloor",
+      "artist": "Cascada",
+      "duration": 208,
+      "timestamp": "3:28",
+      "image": "https://i.ytimg.com/vi/A68j28KQaik/hqdefault.jpg",
+      "releaseYear": "2010",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-15T12:59:40.040Z"
+    },
+    {
+      "id": "3RFNuEWf-rA",
+      "file": "Cascada - Glorious.mp3",
+      "title": "Glorious",
+      "artist": "Cascada",
+      "duration": 208,
+      "timestamp": "3:28",
+      "image": "https://i.ytimg.com/vi/EveTp7w1ucU/hq2.jpg",
+      "releaseYear": "2013",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-15T12:59:40.050Z"
+    },
+    {
+      "id": "fPBgQdTsDxk",
+      "file": "Cascada - Runaway.mp3",
+      "title": "Runaway",
+      "artist": "Cascada",
+      "duration": 212,
+      "timestamp": "3:32",
+      "image": "https://i.ytimg.com/vi/fPBgQdTsDxk/hq720.jpg",
+      "releaseYear": "2012",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-15T13:30:39.787Z"
+    },
+    {
+      "id": "B5F0kfWY_Rw",
+      "file": "James Hype - Ferrari ft. Miggy Dela Rosa.mp3",
+      "title": "Ferrari ft. Miggy Dela Rosa",
+      "artist": "James Hype",
+      "duration": 187,
+      "timestamp": "3:07",
+      "image": "https://i.ytimg.com/vi/B5F0kfWY_Rw/hq720.jpg",
+      "releaseYear": "2022",
+      "users": [
+        "mojca",
+        "matija"
+      ],
+      "createdAt": "2023-04-15T17:25:46.003Z"
+    },
+    {
+      "id": "KAVc-g5K1b0",
+      "file": "Dua Lipa - New Rules.mp3",
+      "title": "New Rules",
+      "artist": "Dua Lipa",
+      "duration": 210,
+      "timestamp": "3:30",
+      "image": "https://i.ytimg.com/vi/k2qgadSvNyU/hqdefault.jpg",
+      "releaseYear": "2018",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-17T14:51:16.299Z"
+    },
+    {
+      "id": "6GzDle_ohek",
+      "file": "Dua Lipa - Love Again.mp3",
+      "title": "Love Again",
+      "artist": "Dua Lipa",
+      "duration": 256,
+      "timestamp": "4:16",
+      "image": "https://i.ytimg.com/vi/BC19kwABFwc/hq720.jpg",
+      "releaseYear": "2022",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-17T14:55:14.785Z"
+    },
+    {
+      "id": "SRdlnO9gMIY",
+      "file": "Dua Lipa - Physical.mp3",
+      "title": "Physical",
+      "artist": "Dua Lipa",
+      "duration": 194,
+      "timestamp": "3:14",
+      "image": "https://i.ytimg.com/vi/9HDEHj2yzew/hqdefault.jpg",
+      "releaseYear": "2020",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-17T14:59:35.864Z"
+    },
+    {
+      "id": "C2KzDfjx25w",
+      "file": "Rita Ora - Anywhere.mp3",
+      "title": "Anywhere",
+      "artist": "Rita Ora",
+      "duration": 216,
+      "timestamp": "3:36",
+      "image": "https://i.ytimg.com/vi/ksdAs4LBRq8/hqdefault.jpg",
+      "releaseYear": "2018",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-17T15:08:05.482Z"
+    },
+    {
+      "id": "XCQK6LmhYqc",
+      "file": "Rita Ora - Let You Love Me.mp3",
+      "title": "Let You Love Me",
+      "artist": "Rita Ora",
+      "duration": 191,
+      "timestamp": "3:11",
+      "image": "https://i.ytimg.com/vi/XCQK6LmhYqc/hq720.jpg",
+      "releaseYear": "2019",
+      "users": [
+        "matija"
+      ],
+      "createdAt": "2023-04-17T16:53:17.726Z"
     }
   ]
 }

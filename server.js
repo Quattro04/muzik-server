@@ -5,11 +5,11 @@ import express from 'express';
 import http from 'http';
 import fs from 'fs';
 import cors from 'cors';
+import morgan from 'morgan';
 import * as dotenv from "dotenv";
 import { Low } from 'lowdb'
 import { JSONFile } from 'lowdb/node'
 import multer from 'multer';
-import id3 from 'node-id3';
 import mp3Duration from 'mp3-duration';
 import yts from 'yt-search';
 import YoutubeMp3Downloader from 'youtube-mp3-downloader';
@@ -18,6 +18,7 @@ import YoutubeMp3Downloader from 'youtube-mp3-downloader';
 // Set up express app and create HTTP server
 const app = express();
 app.use(express.json()); // use built-in json parser
+app.use(morgan('dev'));
 const server = http.createServer(app);
 
 // File path
@@ -177,50 +178,56 @@ app.post('/user-to-song', (req, res) => {
     return res.json({ error: `Error: song with id ${id} not found` })
 });
 
+const ytSuccess = (res, songData) => {
+    try {
+        const { songs } = db.data;
+        songs.push(songData);
+        db.write();
+        return res.json({ message: 'Successfully added to library' })
+    } catch (e) {
+        console.log('ERROR adding song - wrting to db: ');
+        console.error(e)
+        return res.json({ error: 'ERROR adding song - wrting to db' })
+    }
+};
+
+const ytError = (res) => {
+    console.log('YTD Error: ');
+    console.log(error);
+    return res.json({ error: 'YTD error' })
+}
+
+
 app.post('/yt-add', (req, res) => {
 
-    const id = req.body.id;
-    const url = req.body.url;
-    const image = req.body.image;
-    const duration = req.body.duration;
-    const timestamp = req.body.timestamp;
-    const artist = req.body.artist;
-    const title = req.body.title;
-    const releaseYear = req.body.releaseYear;
-    const user = req.body.user;
+    const songData = {
+        id: req.body.id,
+        file: `${req.body.artist} - ${req.body.title}.mp3`,
+        title: req.body.title,
+        artist: req.body.artist,
+        duration: req.body.duration,
+        timestamp: req.body.timestamp,
+        image: req.body.image,
+        releaseYear: req.body.releaseYear,
+        users: [req.body.user],
+        createdAt: new Date().toISOString()
+    }
+
+    // check if already in songs
+    const { songs } = db.data;
+    const song = songs.find(s => s.id === songData.id);
+    if (song) {
+        return res.json({ error: 'Error: Song already exists' })
+    }
 
     try {    
-        YD.on("finished", function(err, data) {
-            try {
-                const { songs } = db.data;
-                songs.push({
-                    id,
-                    file: `${artist} - ${title}.mp3`,
-                    title,
-                    artist,
-                    duration,
-                    timestamp,
-                    image,
-                    releaseYear,
-                    users: [user],
-                    createdAt: new Date().toISOString(),
-                });
-                db.write();
-                res.json({ message: 'Successfully added to library' })
-            } catch (e) {
-                console.log('ERROR adding song - wrting to db: ');
-                console.error(e)
-            }
-        });
-        YD.on("error", function(error) {
-            console.log('YTD Error: ');
-            console.log(error);
-            res.json({ error: 'YTD error' })
-        });
-        YD.download(id, `${artist} - ${title}.mp3`);
+        YD.on("finished", (e) => ytSuccess(res, songData));
+        YD.on("error", (e) => ytError(res));
+        YD.download(songData.id, songData.file);
     } catch (e) {
         console.log('ERROR adding song: ');
         console.log(e);
+        return res.json({ error: 'ERROR adding song:' })
     }    
 });
 
