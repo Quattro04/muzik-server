@@ -10,10 +10,14 @@ import * as dotenv from "dotenv";
 import { Low } from 'lowdb'
 import { JSONFile } from 'lowdb/node'
 import multer from 'multer';
-import mp3Duration from 'mp3-duration';
+// import mp3Duration from 'mp3-duration';
 import yts from 'yt-search';
-import YoutubeMp3Downloader from 'youtube-mp3-downloader';
+// import YoutubeMp3Downloader from 'youtube-mp3-downloader';
 // var YoutubeMp3Downloader = require("youtube-mp3-downloader");
+
+import ytdl from 'ytdl-core';
+import FFmpeg from 'fluent-ffmpeg';
+import { PassThrough } from 'stream';
 
 // Set up express app and create HTTP server
 const app = express();
@@ -49,14 +53,14 @@ const upload = multer(storage);
 
 
 //Configure YoutubeMp3Downloader with your settings
-var YD = new YoutubeMp3Downloader({
-    "ffmpegPath": "./ffmpeg",        // FFmpeg binary location
-    "outputPath": "./songs",    // Output file location (default: the home directory)
-    "youtubeVideoQuality": "highestaudio",  // Desired video quality (default: highestaudio)
-    "queueParallelism": 2,                  // Download parallelism (default: 1)
-    "progressTimeout": 2000,                // Interval in ms for the progress reports (default: 1000)
-    "allowWebm": false                      // Enable download from WebM sources (default: false)
-});
+// var YD = new YoutubeMp3Downloader({
+//     "ffmpegPath": "./ffmpeg",        // FFmpeg binary location
+//     "outputPath": "./songs",    // Output file location (default: the home directory)
+//     "youtubeVideoQuality": "highestaudio",  // Desired video quality (default: highestaudio)
+//     "queueParallelism": 2,                  // Download parallelism (default: 1)
+//     "progressTimeout": 2000,                // Interval in ms for the progress reports (default: 1000)
+//     "allowWebm": false                      // Enable download from WebM sources (default: false)
+// });
 
 
 // Define route to serve the music player client-side code
@@ -84,26 +88,78 @@ app.get('/', (req, res) => {
 // })
 
 // Define route to stream audio files
-app.get('/song/:filename', (req, res) => {
-    // Read audio file from disk
+// app.get('/song/:filename', (req, res) => {
+//     // Read audio file from disk
 
-    const filePath = `./songs/${req.params.filename}`;
-    const stat = fs.statSync(filePath);
-    const audioFile = fs.createReadStream(filePath);
+//     const filePath = `./songs/${req.params.filename}`;
+//     const stat = fs.statSync(filePath);
+//     const audioFile = fs.createReadStream(filePath);
 
-    // Create a lame encoder to convert audio to MP3
-    // const encoder = new Lame({
-    //     output: 'mp3',
-    //     bitrate: 128,
-    // });
+//     // Create a lame encoder to convert audio to MP3
+//     // const encoder = new Lame({
+//     //     output: 'mp3',
+//     //     bitrate: 128,
+//     // });
 
-    res.writeHead(200, {
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': stat.size
-    });
+//     res.writeHead(200, {
+//         'Content-Type': 'audio/mpeg',
+//         'Content-Length': stat.size
+//     });
 
-    // Pipe the audio file to the encoder, and the encoder to the response
-    audioFile.pipe(res);
+//     // Pipe the audio file to the encoder, and the encoder to the response
+//     audioFile.pipe(res);
+// });
+
+const toAudioStream = (uri, opt) => {
+    opt = {
+        ...opt,
+        videoFormat: 'mp4',
+        quality: 'lowest',
+        audioFormat: 'mp3',
+        filter (format) {
+            return format.container === opt.videoFormat && format.audioBitrate
+        }
+    }
+
+    const video = ytdl(uri, opt)
+    const { file, audioFormat } = opt
+    const stream = file ? fs.createWriteStream(file) : new PassThrough()
+    const ffmpeg = new FFmpeg(video)
+
+    process.nextTick(() => {
+        const output = ffmpeg.format(audioFormat).pipe(stream)
+    
+        ffmpeg.once('error', error => stream.emit('error', error))
+        output.once('error', error => {
+            video.end()
+            stream.emit('error', error)
+        })
+    })
+
+    stream.video = video
+    stream.ffmpeg = ffmpeg
+
+    return stream
+}
+
+const streamify = async (url, res) => {
+    toAudioStream(url).pipe(res);
+}
+
+app.get('/song/:ytId', (req, res) => {
+
+    const id = req.params.ytId;
+
+    try {
+        streamify(`https://youtube.com/watch?v=${id}`, res)
+    } catch (err) {
+        console.error(err)
+        if (!res.headersSent) {
+            res.writeHead(500)
+            res.end('internal system error')
+        }
+    }
+
 });
 
 app.get('/songs', (req, res) => {
@@ -220,15 +276,15 @@ app.post('/yt-add', (req, res) => {
         return res.json({ error: 'Error: Song already exists' })
     }
 
-    try {    
-        YD.on("finished", (e) => ytSuccess(res, songData));
-        YD.on("error", (e) => ytError(res));
-        YD.download(songData.id, songData.file);
+    try {
+        songs.push(songData);
+        db.write();
+        return res.json({ message: 'Successfully added to library' })
     } catch (e) {
-        console.log('ERROR adding song: ');
-        console.log(e);
-        return res.json({ error: 'ERROR adding song:' })
-    }    
+        console.log('ERROR adding song - wrting to db: ');
+        console.error(e)
+        return res.json({ error: 'ERROR adding song - wrting to db' })
+    }
 });
 
 // Change DB
