@@ -143,6 +143,10 @@ const toAudioStream = (uri, opt) => {
 }
 
 const streamify = async (url, res) => {
+    res.writeHead(200, {
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': stat.size
+    });
     toAudioStream(url).pipe(res);
 }
 
@@ -233,26 +237,6 @@ app.post('/user-to-song', (req, res) => {
     }
     return res.json({ error: `Error: song with id ${id} not found` })
 });
-
-const ytSuccess = (res, songData) => {
-    try {
-        const { songs } = db.data;
-        songs.push(songData);
-        db.write();
-        return res.json({ message: 'Successfully added to library' })
-    } catch (e) {
-        console.log('ERROR adding song - wrting to db: ');
-        console.error(e)
-        return res.json({ error: 'ERROR adding song - wrting to db' })
-    }
-};
-
-const ytError = (res) => {
-    console.log('YTD Error: ');
-    console.log(error);
-    return res.json({ error: 'YTD error' })
-}
-
 
 app.post('/yt-add', (req, res) => {
 
