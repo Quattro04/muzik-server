@@ -16,8 +16,10 @@ import yts from 'yt-search';
 // var YoutubeMp3Downloader = require("youtube-mp3-downloader");
 
 import ytdl from 'ytdl-core';
-import FFmpeg from 'fluent-ffmpeg';
+// import ffmpeg from 'fluent-ffmpeg';
+import ffmpeg from 'ffmpeg-static';
 import { PassThrough } from 'stream';
+import { spawn } from 'child_process';
 
 // Set up express app and create HTTP server
 const app = express();
@@ -110,59 +112,110 @@ app.get('/', (req, res) => {
 //     audioFile.pipe(res);
 // });
 
-const toAudioStream = (uri, opt) => {
-    opt = {
-        ...opt,
-        videoFormat: 'mp4',
-        quality: 'lowest',
-        audioFormat: 'mp3',
-        filter (format) {
-            return format.container === opt.videoFormat && format.audioBitrate
-        }
-    }
+// const toAudioStream = (uri, res) => {
+//     const opt = {
+//         videoFormat: 'mp4',
+//         quality: 'lowest',
+//         audioFormat: 'mp3'
+//     };
 
-    const video = ytdl(uri, opt)
-    const { file, audioFormat } = opt
-    const stream = file ? fs.createWriteStream(file) : new PassThrough()
-    const ffmpeg = new FFmpeg(video)
+//     const video = ytdl(uri, opt);
+//     const { audioFormat } = opt;
+//     const stream = new PassThrough();
+//     const ffmpeg = new FFmpeg(video);
 
-    process.nextTick(() => {
-        const output = ffmpeg.format(audioFormat).pipe(stream)
+//     process.nextTick(() => {
+//         const output = ffmpeg.format(audioFormat).pipe(stream)
     
-        ffmpeg.once('error', error => stream.emit('error', error))
-        output.once('error', error => {
-            video.end()
-            stream.emit('error', error)
-        })
-    })
+//         ffmpeg.once('error', error => stream.emit('error', error))
+//         output.once('error', error => {
+//             video.end()
+//             stream.emit('error', error)
+//         })
+//     })
 
-    stream.video = video
-    stream.ffmpeg = ffmpeg
+//     stream.video = video
+//     stream.ffmpeg = ffmpeg
 
-    return stream
-}
+//     res.writeHead(200, {
+//         'Content-Type': 'audio/mpeg',
+//         'Content-Length': video.bytesWritten
+//     });
 
-const streamify = async (url, res) => {
-    res.writeHead(200, {
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': stat.size
-    });
-    toAudioStream(url).pipe(res);
-}
+//     stream.pipe(res).on('finish', () => {
+//         let options = {
+//             "stream_length": 0,
+//             headers: {
+//                 "content-type": 'image/jpeg',
+//                 "content-length": file.bytesWritten
+//             }
+//         }
+
+//         const readStream = fs.createReadStream(fileName);
+
+//         // post the stream
+//         needle('post', url, readStream, options)
+//             .then(resp => {
+//                 console.log("file length", resp.body.length);
+//             })
+//             .catch(err => {})
+//             .finally(() => {
+//                 // Remove the file from disk
+//             });
+//     })
+// }
+
+// const streamify = async (url, res) => {
+    
+//     toAudioStream(url).pipe(res);
+// }
 
 app.get('/song/:ytId', (req, res) => {
 
-    const id = req.params.ytId;
+    // const id = req.params.ytId;
 
-    try {
-        streamify(`https://youtube.com/watch?v=${id}`, res)
-    } catch (err) {
-        console.error(err)
-        if (!res.headersSent) {
-            res.writeHead(500)
-            res.end('internal system error')
-        }
-    }
+    // try {
+    //     toAudioStream(`https://youtube.com/watch?v=${id}`, res)
+    // } catch (err) {
+    //     console.error(err)
+    //     if (!res.headersSent) {
+    //         res.writeHead(500)
+    //         res.end('internal system error')
+    //     }
+    // }
+
+    const audioBitrate = '128k';
+    const videoUrl = `https://www.youtube.com/watch?v=${req.params.ytId}`;
+    const videoStream = ytdl(videoUrl, { filter: 'audioonly' });
+    const ffmpegProcess = spawn(ffmpeg, [
+      '-i', 'pipe:0',
+      '-b:a', audioBitrate,
+      '-f', 'mp3',
+      'pipe:1'
+    ]);
+
+    res.setHeader('Content-Type', 'audio/mpeg');
+    videoStream.pipe(ffmpegProcess.stdin);
+
+    ffmpegProcess.on('error', (err) => {
+      console.error(err);
+      res.status(500).send('An error occurred');
+    });
+
+    ffmpegProcess.stderr.on('data', (data) => {
+      console.error(data.toString());
+    });
+
+    ffmpegProcess.stdout.pipe(res);
+
+    res.on('headers', (headers) => {
+      res.setHeader('Content-Length', headers['content-length']);
+    });
+
+    req.on('close', () => {
+      // Kill the FFmpeg process if the client cancels the request
+      ffmpegProcess.kill('SIGKILL');
+    });
 
 });
 
