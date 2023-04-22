@@ -245,8 +245,8 @@ app.get('/song/:ytId', async (req, res) => {
 
     res.setHeader('Content-Type', 'audio/mpeg');
     // res.setHeader('Content-Disposition', `attachment; filename="${info.videoDetails.title}.mp3"`);
-    // res.setHeader('Content-Length', 5234234);
-    res.removeHeader('content-length');
+    res.setHeader('Content-Length', 5234234);
+    // res.removeHeader('content-length');
 
     audioStream.pipe(res);
 
