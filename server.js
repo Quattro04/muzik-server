@@ -239,16 +239,33 @@ app.get('/', (req, res) => {
 
 
 app.get('/song/:ytId', async (req, res) => {
+
     const videoUrl = `https://www.youtube.com/watch?v=${req.params.ytId}`;
-    const info = await ytdl.getInfo(videoUrl);
-    const audioStream = ytdl(videoUrl, { filter: 'audioonly' });
+    res.header('Content-Disposition', `attachment; filename="video.mp3"`); // set the filename of the downloaded file
+    ytdl(videoUrl, { filter: 'audioonly' }).pipe(res); // download the audio-only stream and pipe it to the response
 
-    res.setHeader('Content-Type', 'audio/mpeg');
-    // res.setHeader('Content-Disposition', `attachment; filename="${info.videoDetails.title}.mp3"`);
-    res.setHeader('Content-Length', 5234234);
-    // res.removeHeader('content-length');
+    // const videoUrl = `https://www.youtube.com/watch?v=${req.params.ytId}`;
+    // const info = await ytdl.getInfo(videoUrl);
+    // const audioStream = ytdl(videoUrl, { filter: 'audioonly' });
 
-    audioStream.pipe(res);
+    // // Set the Content-Type header to audio/mpeg
+    // res.setHeader('Content-Type', 'audio/mpeg');
+
+    // // Set the Accept-Ranges header to bytes
+    // res.setHeader('Accept-Ranges', 'bytes');
+
+
+    // // Get the size of the audio stream
+    // const audioStreamSize = parseInt(info.videoDetails.lengthSeconds) * parseInt(info.videoDetails.averageBitrate);
+    // console.log(info.videoDetails.lengthSeconds, info.videoDetails.averageBitrate, audioStreamSize);
+    // console.log('asdasd ', info.contentLength);
+
+    // res.setHeader('Content-Type', 'audio/mpeg');
+    // // res.setHeader('Content-Disposition', `attachment; filename="${info.videoDetails.title}.mp3"`);
+    // res.setHeader('Content-Length', audioStreamSize);
+    // // res.removeHeader('content-length');
+
+    // audioStream.pipe(res);
 
     // var proc = new ffmpeg(audioStream)
     //     .outputOptions([
