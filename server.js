@@ -237,12 +237,83 @@ app.get('/', (req, res) => {
 //     }
 //   });
 
+app.get('/songdl/:ytId', async (req, res) => {
+    const url = `https://www.youtube.com/watch?v=${req.params.ytId}`;
+    const videoInfo = await ytdl.getInfo(url);
+    const audioFormat = ytdl.chooseFormat(videoInfo.formats, { filter: 'audioonly' });
+    const audioFilePath = join(__dirname, 'audio.m4a');
+
+    const audioFile = fs.createWriteStream(audioFilePath);
+    // ytdl(url, { format: audioFormat }).pipe(fs.createWriteStream('audio.m4a'));
+
+    try {
+        await new Promise((resolve, reject) => {
+            ytdl(url, { format: audioFormat })
+                .on('error', error => reject(error))
+                .pipe(audioFile)
+                .on('finish', () => resolve());
+        });
+
+        const audioFileStat = fs.statSync(audioFilePath);
+        const fileSize = audioFileStat.size;
+
+        res.setHeader('Content-Length', fileSize);
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.title}.m4a"`);
+        const audioReadStream = fs.createReadStream(audioFilePath);
+        audioReadStream.pipe(res);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred while processing your request.');
+    } finally {
+        // fs.unlinkSync(audioFilePath);
+    }
+});
+
 
 app.get('/song/:ytId', async (req, res) => {
 
-    const videoUrl = `https://www.youtube.com/watch?v=${req.params.ytId}`;
-    res.header('Content-Disposition', `attachment; filename="video.mp3"`); // set the filename of the downloaded file
-    ytdl(videoUrl, { filter: 'audioonly' }).pipe(res); // download the audio-only stream and pipe it to the response
+    const url = `https://www.youtube.com/watch?v=${req.params.ytId}`;
+    const videoInfo = await ytdl.getInfo(url);
+    const audioFormat = ytdl.chooseFormat(videoInfo.formats, { filter: 'audioonly' });
+    const audioFilePath = join(__dirname, 'audio.m4a');
+    const audioFile = fs.createWriteStream(audioFilePath);
+
+    try {
+        await new Promise((resolve, reject) => {
+            ytdl(url, { format: audioFormat })
+                .on('error', error => reject(error))
+                .pipe(audioFile)
+                .on('finish', () => resolve());
+        });
+
+        const audioFileStat = fs.statSync(audioFilePath);
+        const fileSize = audioFileStat.size;
+
+        res.setHeader('Content-Length', fileSize);
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.title}.m4a"`);
+        const audioReadStream = fs.createReadStream(audioFilePath);
+        audioReadStream.pipe(res);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred while processing your request.');
+    } finally {
+        // fs.unlinkSync(audioFilePath);
+    }
+
+
+    // TA V REDU
+
+    // const videoUrl = `https://www.youtube.com/watch?v=${req.params.ytId}`;
+    // res.header('Content-Disposition', `attachment; filename="video.mp3"`); // set the filename of the downloaded file
+    // ytdl(videoUrl, { filter: 'audioonly' }).pipe(res); // download the audio-only stream and pipe it to the response
+
+    // TA V REDU
+
+    // -----------------------
+
+    // OTHER SHIT
 
     // const videoUrl = `https://www.youtube.com/watch?v=${req.params.ytId}`;
     // const info = await ytdl.getInfo(videoUrl);
