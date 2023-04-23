@@ -277,6 +277,7 @@ app.get('/song/:ytId', async (req, res) => {
     const videoInfo = await ytdl.getInfo(url);
     const audioFormat = ytdl.chooseFormat(videoInfo.formats, { filter: 'audioonly' });
     const audioFilePath = join(__dirname, 'audio.m4a');
+    const mp3FilePath = join(__dirname, 'audio.mp3');
     const audioFile = fs.createWriteStream(audioFilePath);
 
     try {
@@ -287,15 +288,15 @@ app.get('/song/:ytId', async (req, res) => {
                 .on('finish', () => resolve());
         });
 
-        const mp3FilePath = join(__dirname, 'audio.mp3');
+        // TODO: Dont convert if not listening from ios
         await new Promise((resolve, reject) => {
-        ffmpeg()
-            .input(audioFilePath)
-            .output(mp3FilePath)
-            .audioCodec('libmp3lame')
-            .on('error', error => reject(error))
-            .on('end', () => resolve())
-            .run();
+            ffmpeg()
+                .input(audioFilePath)
+                .output(mp3FilePath)
+                .audioCodec('libmp3lame')
+                .on('error', error => reject(error))
+                .on('end', () => resolve())
+                .run();
         });
 
         const mp3FileStat = fs.statSync(mp3FilePath);
@@ -303,7 +304,7 @@ app.get('/song/:ytId', async (req, res) => {
 
         res.setHeader('Content-Length', fileSize);
         res.setHeader('Content-Type', 'audio/mpeg');
-        res.setHeader('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.title}.mp3"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.videoId}.mp3"`);
         const audioReadStream = fs.createReadStream(mp3FilePath);
         audioReadStream.pipe(res);
     } catch (error) {
@@ -311,6 +312,7 @@ app.get('/song/:ytId', async (req, res) => {
         res.status(500).send('An error occurred while processing your request.');
     } finally {
         // fs.unlinkSync(audioFilePath);
+        // fs.unlinkSync(mp3FilePath);
     }
 
 
