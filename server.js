@@ -291,7 +291,7 @@ app.get('/song/:ytId', async (req, res) => {
         const fileSize = audioFileStat.size;
 
         res.setHeader('Content-Length', fileSize);
-        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Content-Type', 'audio/x-m4a');
         res.setHeader('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.title}.m4a"`);
         const audioReadStream = fs.createReadStream(audioFilePath);
         audioReadStream.pipe(res);
