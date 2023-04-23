@@ -287,13 +287,24 @@ app.get('/song/:ytId', async (req, res) => {
                 .on('finish', () => resolve());
         });
 
-        const audioFileStat = fs.statSync(audioFilePath);
-        const fileSize = audioFileStat.size;
+        const mp3FilePath = join(__dirname, 'audio.mp3');
+        await new Promise((resolve, reject) => {
+        ffmpeg()
+            .input(audioFilePath)
+            .output(mp3FilePath)
+            .audioCodec('libmp3lame')
+            .on('error', error => reject(error))
+            .on('end', () => resolve())
+            .run();
+        });
+
+        const mp3FileStat = fs.statSync(mp3FilePath);
+        const fileSize = mp3FileStat.size;
 
         res.setHeader('Content-Length', fileSize);
-        res.setHeader('Content-Type', 'audio/x-m4a');
-        res.setHeader('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.title}.m4a"`);
-        const audioReadStream = fs.createReadStream(audioFilePath);
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.title}.mp3"`);
+        const audioReadStream = fs.createReadStream(mp3FilePath);
         audioReadStream.pipe(res);
     } catch (error) {
         console.error(error);
