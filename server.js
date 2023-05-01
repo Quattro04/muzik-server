@@ -10,6 +10,7 @@ import * as dotenv from "dotenv";
 import multer from 'multer';
 
 const statusColor = (stat) => {
+    if (!stat) return '#2ed573';
     if (stat.charAt(0) === '2') {
         return '#2ed573';
     }
