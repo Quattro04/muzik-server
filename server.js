@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import chalk from 'chalk';
 import * as dotenv from "dotenv";
 import multer from 'multer';
+import fs from 'fs';
 
 const statusColor = (stat) => {
     if (!stat) return '#2ed573';
@@ -34,13 +35,12 @@ const morganMiddleware = morgan(function (tokens, req, res) {
         chalk.yellow('@ ' + tokens.date(req, res)),
     ].join(' ');
 });
-
+// app.use(morganMiddleware);
 
 // Set up express app and create HTTP server
 const app = express();
 app.use(express.json({ extended: true }));
 
-app.use(morganMiddleware);
 const server = http.createServer(app);
 
 // File path
@@ -70,7 +70,7 @@ const songUpload = multer({ storage: songStorage });
 const imageUpload = multer({ storage: imageStorage });
 
 // Define route to serve the music player client-side code
-app.use(express.static(__dirname + '/public'));
+// app.use(express.static(__dirname + '/public'));
 
 app.use(cors({
     origin: [
@@ -91,6 +91,54 @@ app.post('/upload', songUpload.single('file'), (req, res) => {
 app.post('/img-upload', imageUpload.single('file'), (req, res) => {
     res.json({ message: 'File uploaded successfully!' });
 });
+
+const parseRange = (start, chunk, size) => {
+    if (start + chunk > size) {
+        return { start, end: size };
+    }
+    return { start, end: start + chunk };
+}
+
+app.get('/songs/:id', (req, res) => {
+    const id = req.params.id;
+    const filePath = join(__dirname, `/public/songs/${id}`);
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+  
+    if (range) {
+        const rangeNum = range.split('=')[1].split('-')[0];
+
+        let rng = parseRange(Number(rangeNum), 10000, fileSize);
+        if (range === 'bytes=0-') {
+            rng = parseRange(Number(rangeNum), 3000000, fileSize);
+        }
+
+        let start = rng.start;
+        let end = rng.end;
+
+        const chunkSize = (end - start);
+    
+        const fileStream = fs.createReadStream(filePath, { start, end });
+        const headers = {
+            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunkSize,
+            'Content-Type': 'audio/mpeg',
+        };
+    
+        res.writeHead(206, headers);
+        fileStream.pipe(res);
+    } else {
+        const headers = {
+            'Content-Length': fileSize,
+            'Content-Type': 'audio/mpeg',
+        };
+    
+        res.writeHead(200, headers);
+        fs.createReadStream(filePath).pipe(res);
+    }
+})
 
 server.listen(process.env.PORT || 3000, () => {
     console.log(`Server listening on port ${process.env.PORT || 3000}`);
